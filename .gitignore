@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+/Dígitos-20220611T214249Z-001/
 # C extensions
 *.so
 
