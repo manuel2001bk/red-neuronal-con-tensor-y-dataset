@@ -1,10 +1,9 @@
-from ast import Try
-from typing_extensions import Self
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import os
+import seaborn as sns
 
 from ventana_ui import *
 
@@ -20,6 +19,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.categorias = []
         self.labels = []
+        self.labelsY = []
         self.imagenes = []
         self.model = []
         self.historial = []
@@ -41,6 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def limpieza(self):
         self.categorias = []
         self.labels = []
+        self.labelsY = []
         self.imagenes = []
         self.model = []
         self.historial = []
@@ -51,7 +52,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             tf.keras.layers.Flatten(input_shape=(28, 28)),
             tf.keras.layers.Dense(50, activation='relu'),
             tf.keras.layers.Dense(50, activation='relu'),
-            tf.keras.layers.Dense(10, activation='softmax'),
+            tf.keras.layers.Dense(14, activation='softmax'),
         ])
 
     def compilar_modelo_red(self):
@@ -83,6 +84,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 img = np.asarray(img)
                 self.imagenes.append(img)
                 self.labels.append(x)
+                self.labelsY.append(x)
             x += 1
 
     def get_categorias(self):
@@ -94,13 +96,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         plt.show()
 
     def tabla_predicciones(self):
-        imge = Image.open(f'test/0.png')
-        imge = np.asarray(imge)
-        imge = np.array([imge])
-        print(imge.shape)
-        self.predic = self.model.predict(imge)
-
-        print(self.categorias[np.argmax(self.predic[0])])
+        pred = self.model.predict(self.imagenes)
+        for dato in pred:
+            self.predic.append(np.argmax(dato))
+        print(self.predic)
+        confusion_mtx = tf.math.confusion_matrix(self.labelsY, self.predic)
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(confusion_mtx,
+                    xticklabels=self.categorias,
+                    yticklabels=self.categorias,
+                    annot=True, fmt='g')
+        plt.xlabel('Prediction')
+        plt.ylabel('Label')
+        plt.show()
 
 
 if __name__ == "__main__":
